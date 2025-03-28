@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TF-IDF Analysis Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .upload-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px dashed #ccc;
+        }
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .upload-btn:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .numeric {
+            text-align: right;
+            font-family: monospace;
+        }
+        #file-info {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h2>Upload New File</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="file-input" accept=".txt,.pdf,.doc,.docx">
+            <button type="submit" class="upload-btn">Analyze</button>
+            <div id="file-info">Selected file: <span id="filename">none</span></div>
+        </form>
+    </div>
+
+    <h1>TF-IDF Analysis: {{ filename }}</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Word</th>
+                <th>TF</th>
+                <th>IDF</th>
+                <th>TF-IDF</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for word, stats in words %}
+            <tr>
+                <td>{{ word }}</td>
+                <td class="numeric">{{ "%.6f"|format(stats.tf) }}</td>
+                <td class="numeric">{{ "%.6f"|format(stats.idf) }}</td>
+                <td class="numeric">{{ "%.6f"|format(stats.tfidf) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        // Показываем имя выбранного файла
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'none';
+            document.getElementById('filename').textContent = fileName;
+        });
+    </script>
+</body>
+</html>
