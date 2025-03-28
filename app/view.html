@@ -1,110 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TF-IDF Analysis Results</title>
+    <title>TF-IDF Analyzer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
+
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .upload-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            padding: 0.5rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: #f8f8f8;
+        }
+
+        button {
+            padding: 0.5rem 1.5rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .results-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
         h1 {
             color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
         }
-        .upload-container {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border: 1px dashed #ccc;
-        }
-        .upload-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .upload-btn:hover {
-            background-color: #45a049;
-        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 1rem;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
+
+        th,
+        td {
+            padding: 12px 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
+
         th {
-            background-color: #f2f2f2;
-            position: sticky;
-            top: 0;
+            background-color: #f8f8f8;
+            font-weight: 600;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #f5f5f5;
         }
+
         .numeric {
-            text-align: right;
             font-family: monospace;
+            text-align: right;
         }
-        #file-info {
-            margin-top: 10px;
-            font-style: italic;
+
+        .filename {
             color: #666;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        .error {
+            color: #dc3545;
+            padding: 1rem;
+            background: #f8d7da;
+            border-radius: 5px;
+            margin: 1rem 0;
         }
     </style>
 </head>
+
 <body>
-    <div class="upload-container">
-        <h2>Upload New File</h2>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" id="file-input" accept=".txt,.pdf,.doc,.docx">
-            <button type="submit" class="upload-btn">Analyze</button>
-            <div id="file-info">Selected file: <span id="filename">none</span></div>
+    <div class="upload-section">
+        <h1>TF-IDF Analyzer</h1>
+        <form class="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" accept=".txt">
+            <button type="submit">Analyze</button>
         </form>
+        {% if filename %}
+        <div class="filename">Analyzing file: {{ filename }}</div>
+        {% endif %}
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
     </div>
 
-    <h1>TF-IDF Analysis: {{ filename }}</h1>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Word</th>
-                <th>TF</th>
-                <th>IDF</th>
-                <th>TF-IDF</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for word, stats in words %}
-            <tr>
-                <td>{{ word }}</td>
-                <td class="numeric">{{ "%.6f"|format(stats.tf) }}</td>
-                <td class="numeric">{{ "%.6f"|format(stats.idf) }}</td>
-                <td class="numeric">{{ "%.6f"|format(stats.tfidf) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if words %}
+    <div class="results-section">
+        <table>
+            <thead>
+                <tr>
+                    <th>Word</th>
+                    <th class="numeric">TF</th>
+                    <th class="numeric">IDF</th>
+                    <th class="numeric">TF-IDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for word, stats in words %}
+                <tr>
+                    <td>{{ word }}</td>
+                    <td class="numeric">{{ "%.6f"|format(stats.tf) }}</td>
+                    <td class="numeric">{{ "%.6f"|format(stats.idf) }}</td>
+                    <td class="numeric">{{ "%.6f"|format(stats.tfidf) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 
     <script>
-        // Показываем имя выбранного файла
-        document.getElementById('file-input').addEventListener('change', function(e) {
-            const fileName = e.target.files[0] ? e.target.files[0].name : 'none';
-            document.getElementById('filename').textContent = fileName;
+        // Обновление имени файла при выборе
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const fileName = e.target.files[0]?.name || 'No file selected'
+            document.querySelector('.filename').textContent = `Selected file: ${fileName}`
         });
     </script>
 </body>
+
 </html>

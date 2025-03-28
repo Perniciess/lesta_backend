@@ -1,50 +1,53 @@
-import re
-from collections import Counter
+from collections import defaultdict
 import math
-from typing import List
+import os
+import string
 
-def process_file_tfidf(file_path: str, existing_documents: List[set] = None) -> dict:
-    """Обрабатывает файл и возвращает TF-IDF статистику"""
-    with open(file_path, 'r', encoding='utf-8') as file:
-        text = file.read()
-    
-    # Предобработка текста
-    def preprocess_text(text):
-        text = text.lower()
-        text = re.sub(r'[^a-zа-яё\s]', '', text)
-        return text.split()
-    
-    words = preprocess_text(text)
-    
-    if existing_documents is None:
-        existing_documents = []
-    
+
+def process_file_tfidf(folder_path):
+    """Обработка всех файлов в указанной папке"""
+    documents = {}
+    # Чтение и обработка всех текстовых файлов
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".txt"):
+            file_path = os.path.join(folder_path, filename)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read().lower()
+                text = text.translate(str.maketrans('', '', string.punctuation))
+                documents[filename] = text.split()
+
+    if not documents:
+        return {}
+
     # Расчет TF
-    word_counts = Counter(words)
-    total_words = len(words)
-    tf = {word: count/total_words for word, count in word_counts.items()}
-    
-    # Добавляем слова текущего документа
-    current_doc_words = set(words)
-    all_docs = existing_documents + [current_doc_words]
-    
+    tfs = defaultdict(dict)
+    for doc, words in documents.items():
+        word_count = len(words)
+        freq = defaultdict(int)
+        for word in words:
+            freq[word] += 1
+        for word, count in freq.items():
+            tfs[doc][word] = count / word_count
+
     # Расчет IDF
-    idf = {}
-    for word in current_doc_words:
-        doc_count = sum(1 for doc in all_docs if word in doc)
-        idf[word] = math.log(len(all_docs) / (doc_count + 1e-10))
-    
-    # Формирование результата
-    result = {
-        "word_stats": {
-            word: {
-                "tf": tf.get(word, 0),
-                "idf": idf.get(word, 0),
-                "tfidf": tf.get(word, 0) * idf.get(word, 0)
+    doc_freq = defaultdict(int)
+    total_docs = len(documents)
+    for words in documents.values():
+        for word in set(words):
+            doc_freq[word] += 1
+
+    idf = {word: math.log(total_docs / (1 + count)) for word, count in doc_freq.items()}
+
+    # Расчет TF-IDF
+    tfidf_result = defaultdict(dict)
+    for doc in documents:
+        for word in tfs[doc]:
+            tf_val = tfs[doc][word]
+            idf_val = idf[word]
+            tfidf_result[doc][word] = {
+                "tf": round(tf_val, 6),
+                "idf": round(idf_val, 6),
+                "tfidf": round(tf_val * idf_val, 6)
             }
-            for word in current_doc_words
-        },
-        "document_words": current_doc_words
-    }
-    
-    return result
+
+    return tfidf_result

@@ -1,0 +1,3 @@
+This is the meaning of our liberty and our creed; why men and women and children of every race and every faith can join in celebration across this magnificent Mall, and why a man whose father less than 60 years ago might not have been served at a local restaurant can now stand before you to take a most sacred oath. So let us mark this day with remembrance of who we are and how far we have traveled.
+—Barack Obama, Inaugural Presidential Address, January 2009
+During Barack Obama’s Inaugural Address in January 2009, he mentioned “women” four different times, including in the passage quoted above. How distinctive is Obama’s inclusion of women in this address compared to all other U.S. Presidents? This is one of the questions that we’re going to try to answer with tf-idf.

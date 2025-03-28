@@ -24,28 +24,34 @@ async def index(request: Request):
 
 @router.post("/upload")
 async def upload_file(request: Request, file: UploadFile):
-    # Сохраняем временный файл
-    temp_path = f"temp_{file.filename}"
-    with open(temp_path, "wb") as buffer:
+    # Сохраняем файл в папку uploads
+    uploads_dir = "uploads"
+    os.makedirs(uploads_dir, exist_ok=True)
+    file_path = os.path.join(uploads_dir, file.filename)
+    
+    with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
+
+    # Обрабатываем все документы
+    results = process_file_tfidf(uploads_dir)
     
-    # Обрабатываем файл
-    result = process_file_tfidf(temp_path)
-    os.remove(temp_path)
-    
-    # Сортируем слова по TF-IDF (по убыванию) и берем топ-50
+    # Получаем данные для текущего файла
+    current_doc = file.filename
+    if current_doc not in results:
+        return templates.TemplateResponse("view.html", {
+            "request": request,
+            "error": "Ошибка обработки файла"
+        })
+
+    # Сортируем и ограничиваем топ-50 результатов
     sorted_words = sorted(
-        result["word_stats"].items(),
+        results[current_doc].items(),
         key=lambda x: x[1]["tfidf"],
         reverse=True
     )[:50]
-    
-    # Передаем данные в шаблон
-    return templates.TemplateResponse(
-        "view.html",
-        {
-            "request": request,
-            "filename": file.filename,
-            "words": sorted_words
-        }
-    )
+
+    return templates.TemplateResponse("view.html", {
+        "request": request,
+        "filename": current_doc,
+        "words": sorted_words
+    })
